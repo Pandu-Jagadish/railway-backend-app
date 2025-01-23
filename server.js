@@ -1,12 +1,15 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors"); // Import the cors middleware
+const cors = require("cors");
 
 const app = express();
 
-app.use(express.json());
+// Middleware
+app.use(express.json()); // For parsing JSON in the body
+app.use(cors({ origin: "*" }));
 
-const mongoURI = "mongodb://localhost:27017/railways";
+// MongoDB connection
+const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/railways"; // Fallback to local DB for development
 
 mongoose
   .connect(mongoURI, {
@@ -14,15 +17,11 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
+  .catch((err) => console.log("MongoDB connection error:", err));
 
-app.use(
-  cors({
-    origin: "*",
-  })
-);
+// Routes
+app.use("/api/trains", require("./routes/train")); // Mounting the trains route
 
-app.use("/api/trains", require("./routes/train"));
-
-const PORT = process.env.PORT || 5000;
+// Start server
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

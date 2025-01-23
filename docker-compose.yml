@@ -1,0 +1,30 @@
+services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017" # Expose MongoDB to the host
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081" # Expose Mongo Express to the host
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+      ME_CONFIG_BASICAUTH: false
+
+  app:
+    image: gandijagadish/railway-backend:v1 # Your custom Express backend image
+    container_name: railway-api
+    environment:
+      - MONGO_URI=mongodb://root:example@mongo:27017/railways?authSource=admin
+    ports:
+      - "5001:5001" # Expose Express API to the host
+    depends_on:
+      - mongo # Ensure that MongoDB is ready before the Express app starts
